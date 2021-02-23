@@ -18,52 +18,64 @@ namespace ProgramChat_Hw
 
         }
 
+        public class LoginRegisterData
+        {
+            public string eventName;
+            public string userID;
+            public string userPassword;
+            public string userName;
+        }
 
         public enum State
         {
             Lobby,
-            CreateRoom,
+            LoginRegister,
             JoinRoom,
             InRoom
         }
         private State state;
 
+        //private string roomName;
+        [Header("CallBackUI")]//---------------------CallBackUI
+        public GameObject callBackUI;
+        public Text callBackText;
+
+        [Header("LobbyUI")]//---------------------LobbyUI
+        public GameObject lobbyUI;
         public Text inputCreateRoom;
         public Text inputJoinRoom;
         private string roomUserName;
-        //private string roomName;
+        public Text nameThisUser;
 
-        public GameObject lobby;
-
+        [Header("ChatUI")]//------------------ChatUI
         public GameObject programChat;
         public Text roomNameText;
-
         public Text chatText;
         public Text userText;
         public Text coUserText;
-        public InputField ip;
-        public InputField port;
-        //private bool checkChatUpdate = false;
-        //public bool checkIsChatUser = false;
         private string tempMessageString;
 
-        public GameObject bgLogin;
-        public string statusEvent;
-        public bool isSent = false;
+        [Header("LoginUI")]//-------------------------LoginUI
 
+        public GameObject loginUi;
+        public InputField loginUserIDInput;
+        public InputField loginPasswordInput;
+
+        [Header("RegisterUI")]//-----------------------RegisterUI
+        public GameObject registerUi;
+        public InputField registerUserIDInput;
+        public InputField registerPasswordInput;
+        public InputField registerNameInput;
+
+
+        [Header("ConnectUI")]//------------------------ConnectUI
+        public GameObject connectUi;
+        public InputField ip;
+        public InputField port;
+        
+        public string statusEvent;
         private WebSocket websocket;
 
-        /*struct ChatManager
-        {
-            public string status;
-            public string messageUser;
-
-            public ChatManager(string status,string messageUser)
-            {
-                this.status = status;
-                this.messageUser = messageUser;
-            }
-        }*/
 
         struct SocketEvent
         {
@@ -78,23 +90,21 @@ namespace ProgramChat_Hw
 
         }
 
-        //private GameObject Room;
-        private string testText;
+
 
         void Start()
         {
             tempMessageString = "";
-            state = State.Lobby;
+            state = State.LoginRegister;
         }
 
         public void Update()
         {
-            CreateJoinRoom();
+            CallBackCreateJoinRoom();
+            CallBackLoginRegister();
             MessageInRoomAndLeaveRoom();
-            
+
         }
-
-
 
         private void OnDestroy()
         {
@@ -122,8 +132,6 @@ namespace ProgramChat_Hw
               Debug.Log(receiveEventData.eventName);
             }*/
 
-
-
         }
         public void MessageInRoomAndLeaveRoom()
         {
@@ -134,7 +142,7 @@ namespace ProgramChat_Hw
 
                     programChat.SetActive(false);
                     state = State.Lobby;
-                    lobby.SetActive(true);
+                    lobbyUI.SetActive(true);
 
                     tempMessageString = "";
 
@@ -150,7 +158,7 @@ namespace ProgramChat_Hw
                         if (receiveMessageData.message == userText.text)
                         {
                             chatText.text += receiveMessageData.message + "\n";
-                            isSent = false;
+                            //isSent = false;
                         }
                         else
                         {
@@ -160,17 +168,49 @@ namespace ProgramChat_Hw
                         //coUserText.text += tempMessageString + "\n";
                         tempMessageString = "";
 
-
                     }
-                    
+
                 }
-
-
-
             }
 
         }
-        public void CreateJoinRoom()
+
+        public void CallBackLoginRegister()
+        {
+            if(tempMessageString != "" && state == State.LoginRegister){
+
+                LoginRegisterData receiveLoginRegisterData = JsonUtility.FromJson<LoginRegisterData>(tempMessageString);
+                if(receiveLoginRegisterData.eventName == "LoginSuccess"){
+                    loginUi.SetActive(false);
+                    lobbyUI.SetActive(true);
+                    nameThisUser.text += "\n\n" + receiveLoginRegisterData.userName;
+                    state = State.Lobby;
+
+
+                }
+                else if (receiveLoginRegisterData.eventName == "LoginFail"){
+                    callBackUI.SetActive(true);
+                    callBackText.text = "Login Fail With UserID : "+receiveLoginRegisterData.userID + " Please try again";
+                }
+                else if(receiveLoginRegisterData.eventName == "RegisterSuccess"){
+                    registerUi.SetActive(false);
+                    lobbyUI.SetActive(true);
+                    nameThisUser.text += "\n\n" +receiveLoginRegisterData.userName;
+                    state = State.Lobby;
+
+                }
+                else if(receiveLoginRegisterData.eventName == "RegisterFail"){
+                    callBackUI.SetActive(true);
+                    callBackText.text = "Register Fail With UserID : "+receiveLoginRegisterData.userID + " Please try again";
+                }
+
+                tempMessageString = "";
+            }
+            
+
+
+        }
+        public void CallBackCreateJoinRoom()
         {
             if (tempMessageString != "" && state == State.Lobby)
             {
@@ -179,13 +219,24 @@ namespace ProgramChat_Hw
 
                 if (receiveEventData.eventName == "CreateSuccess" || receiveEventData.eventName == "JoinRoomSuccess")
                 {
-                    lobby.SetActive(false);
+                    lobbyUI.SetActive(false);
                     programChat.SetActive(true);
                     roomUserName = receiveEventData.dataRoomName;
                     Debug.Log("CreateJoinRoom" + roomUserName);
                     roomNameText.text = roomUserName;
                     state = State.InRoom;
 
+                }
+                else if(receiveEventData.eventName == "JoinRoomFail")
+                {
+                    callBackText.text = "Room name : "+receiveEventData.dataRoomName+" is not found";
+                    callBackUI.SetActive(true);
+
+                }
+                else if(receiveEventData.eventName == "CreateFail")
+                {
+                    callBackText.text = "Room name : "+receiveEventData.dataRoomName+" it already create";
+                    callBackUI.SetActive(true);
                 }
                 tempMessageString = "";
 
@@ -222,7 +273,9 @@ namespace ProgramChat_Hw
             }
         }
 
-        public void LeaveRoomButton()
+        //------------------------------------------------------ Button ------------------------------------------------------------------------------
+
+        public void LeaveRoomButton()//------------------------------------------------------------------------------- LeaveRoomButton
         {
             if (state == State.InRoom && websocket.ReadyState == WebSocketState.Open)
             {
@@ -237,15 +290,16 @@ namespace ProgramChat_Hw
             }
         }
 
-        public void LoginButton()
+        public void ConnectButton()// -----------------------------------------------------------------------------------ConnectButton    
         {
-            websocket = new WebSocket($"ws://{ip.text}:{port.text}/");
-            //websocket = new WebSocket("ws://127.0.0.1:5600/");
+            //websocket = new WebSocket($"ws://{ip.text}:{port.text}/");
+            websocket = new WebSocket("ws://127.0.0.1:5600/");
             websocket.OnMessage += OnMessage;
             websocket.Connect();
-            bgLogin.SetActive(false);
+            loginUi.SetActive(true);
+            connectUi.SetActive(false);
         }
-        public void SendButton()
+        public void SendButton()   // -----------------------------------------------------------------------------------SendButton     
         {
             //chatText.text += userText.text + "\n";
             if (userText.text == "" || websocket.ReadyState != WebSocketState.Open)
@@ -257,16 +311,54 @@ namespace ProgramChat_Hw
             NewMessageData.roomName = roomUserName;
 
             string toJsonStr = JsonUtility.ToJson(NewMessageData);
-            isSent = true;
+            //isSent = true;
             websocket.Send(toJsonStr);
             userText.text = "";
 
-            //ChatToSever();
-            //websocket.Send(JsonUtility.ToJson(userText.text));
         }
 
+        public void LoginButton()//------------------------------------------------------------------------------------ LoginButton
+        {
+
+            LoginRegisterData NewLoginData = new LoginRegisterData();
+            NewLoginData.eventName = "Login";
+            NewLoginData.userID = loginUserIDInput.text;
+            NewLoginData.userPassword = loginPasswordInput.text;
+
+            string toJsonStr = JsonUtility.ToJson(NewLoginData);
+            websocket.Send(toJsonStr);    
+            
 
 
+        }
+
+        public void RegisterButtonToServer()//------------------------------------------------------------------------------------ RegisterButton
+        {           
+
+            LoginRegisterData NewRegisterData = new LoginRegisterData();
+            NewRegisterData.eventName = "Register";
+            NewRegisterData.userID = registerUserIDInput.text;
+            NewRegisterData.userPassword = registerPasswordInput.text;
+            NewRegisterData.userName = registerNameInput.text;
+
+            string toJsonStr = JsonUtility.ToJson(NewRegisterData);
+            websocket.Send(toJsonStr);
+            
+            
+
+        }
+        public void RegisterButton()
+        {
+            loginUi.SetActive(false);
+            registerUi.SetActive(true);
+
+        }
+
+        public void CloseCallBackButton()//------------------------------------------------------------------------------------ CloseCallBackButton
+        {
+            callBackUI.SetActive(false);
+
+        }
 
 
     }

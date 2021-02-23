@@ -278,7 +278,7 @@ ScriptsOnlyBuild:
     className: ControlTrack
   - hash:
       serializedVersion: 2
-      Hash: 9f8e2b26e2a96ba1813af7f2fa28fbd8
+      Hash: f983d51dc08d7cc7109d43b44ae54553
     assemblyName: Assembly-CSharp.dll
     namespaceName: ProgramChat_Hw
     className: Websocket_Chat

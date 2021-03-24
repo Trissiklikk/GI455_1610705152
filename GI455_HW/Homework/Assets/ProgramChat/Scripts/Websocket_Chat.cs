@@ -37,11 +37,11 @@ namespace ProgramChat_Hw
 
         //private string roomName;
         [Header("CallBackUI")]//---------------------CallBackUI
-        public GameObject callBackUI;
+        public GameObject callBackUi;
         public Text callBackText;
 
         [Header("LobbyUI")]//---------------------LobbyUI
-        public GameObject lobbyUI;
+        public GameObject lobbyUi;
         public Text inputCreateRoom;
         public Text inputJoinRoom;
         private string roomUserName;
@@ -142,7 +142,7 @@ namespace ProgramChat_Hw
 
                     programChat.SetActive(false);
                     state = State.Lobby;
-                    lobbyUI.SetActive(true);
+                    lobbyUi.SetActive(true);
 
                     tempMessageString = "";
 
@@ -182,25 +182,25 @@ namespace ProgramChat_Hw
                 LoginRegisterData receiveLoginRegisterData = JsonUtility.FromJson<LoginRegisterData>(tempMessageString);
                 if(receiveLoginRegisterData.eventName == "LoginSuccess"){
                     loginUi.SetActive(false);
-                    lobbyUI.SetActive(true);
+                    lobbyUi.SetActive(true);
                     nameThisUser.text += "\n\n" + receiveLoginRegisterData.userName;
                     state = State.Lobby;
 
 
                 }
                 else if (receiveLoginRegisterData.eventName == "LoginFail"){
-                    callBackUI.SetActive(true);
+                    callBackUi.SetActive(true);
                     callBackText.text = "Login Fail With UserID : "+receiveLoginRegisterData.userID + " Please try again";
                 }
                 else if(receiveLoginRegisterData.eventName == "RegisterSuccess"){
                     registerUi.SetActive(false);
-                    lobbyUI.SetActive(true);
+                    lobbyUi.SetActive(true);
                     nameThisUser.text += "\n\n" +receiveLoginRegisterData.userName;
                     state = State.Lobby;
 
                 }
                 else if(receiveLoginRegisterData.eventName == "RegisterFail"){
-                    callBackUI.SetActive(true);
+                    callBackUi.SetActive(true);
                     callBackText.text = "Register Fail With UserID : "+receiveLoginRegisterData.userID + " Please try again";
                 }
 
@@ -219,7 +219,7 @@ namespace ProgramChat_Hw
 
                 if (receiveEventData.eventName == "CreateSuccess" || receiveEventData.eventName == "JoinRoomSuccess")
                 {
-                    lobbyUI.SetActive(false);
+                    lobbyUi.SetActive(false);
                     programChat.SetActive(true);
                     roomUserName = receiveEventData.dataRoomName;
                     Debug.Log("CreateJoinRoom" + roomUserName);
@@ -230,13 +230,13 @@ namespace ProgramChat_Hw
                 else if(receiveEventData.eventName == "JoinRoomFail")
                 {
                     callBackText.text = "Room name : "+receiveEventData.dataRoomName+" is not found";
-                    callBackUI.SetActive(true);
+                    callBackUi.SetActive(true);
 
                 }
                 else if(receiveEventData.eventName == "CreateFail")
                 {
                     callBackText.text = "Room name : "+receiveEventData.dataRoomName+" it already create";
-                    callBackUI.SetActive(true);
+                    callBackUi.SetActive(true);
                 }
                 tempMessageString = "";
 
@@ -244,7 +244,9 @@ namespace ProgramChat_Hw
 
         }
 
-        public void CreateRoom()
+
+        //------------------------------------------------------ Button ------------------------------------------------------------------------------
+        public void CreateRoom()//------------------------------------------------------CreateRoomButton
         {
             roomUserName = inputCreateRoom.text;
 
@@ -258,7 +260,7 @@ namespace ProgramChat_Hw
 
             }
         }
-        public void JoinRoom()
+        public void JoinRoom()//------------------------------------------------------JoinRoomButton
         {
             roomUserName = inputJoinRoom.text;
 
@@ -273,7 +275,7 @@ namespace ProgramChat_Hw
             }
         }
 
-        //------------------------------------------------------ Button ------------------------------------------------------------------------------
+        
 
         public void LeaveRoomButton()//------------------------------------------------------------------------------- LeaveRoomButton
         {
@@ -356,7 +358,7 @@ namespace ProgramChat_Hw
 
         public void CloseCallBackButton()//------------------------------------------------------------------------------------ CloseCallBackButton
         {
-            callBackUI.SetActive(false);
+            callBackUi.SetActive(false);
 
         }
 

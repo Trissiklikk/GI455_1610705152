@@ -116,27 +116,7 @@ let DB = new splice.Database("./DB/programChat.db", splice.OPEN_CREATE | splice.
                         //console.log(err);
 
                     }
-                    /*else {
 
-
-                        var userNameFormServer = rows.UserName
-                        DB.all("SELECT UserName FROM UserDataProgramChat WHERE UserID='" + id + "'", (err, rows))
-                        console.log(userNameFormServer);
-
-                        var resultData =
-                        {
-                            eventName: "LoginSuccess",
-                            userID: toJson.userID,
-                            userName: userNameFormServer
-
-                        }
-                        //Json to string
-                        jsonToStr = JSON.stringify(resultData)
-
-                        ws.send(jsonToStr);
-
-
-                    }*/
                 });
             }
 
@@ -256,30 +236,6 @@ let DB = new splice.Database("./DB/programChat.db", splice.OPEN_CREATE | splice.
             //--------------------------------------------------------------------SentMeassge
             else if (toJson.status == "SentMessage") {
 
-                /*var resultDataMessage = {
-    
-                    status: "CanSentMessage",
-                    message: toJson.message,
-                    roomName: toJson.roomName
-                }
-                jsonToStr = JSON.stringify(resultDataMessage)
-    
-                var messageInRoom = -1;
-                
-                for (var i = 0; i < roomList.length; i++) {
-                    for (var j = 0; j < roomList[i].wsList.length; j++) {
-                        if (roomList[i].wsList[j] == ws) {
-                            messageInRoom = i;
-                            break;
-                        }
-                    }
-                }
-                for (var i = 0; i < roomList[messageInRoom].wsList.length; i++) {
-                    console.log("Ya2");
-    
-                    roomList[messageInRoom].wsList[i].send(jsonToStr);
-    
-                }*/
                 var resultDataMessage = {
 
                     status: "CanSentMessage",
